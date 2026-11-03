@@ -41,7 +41,7 @@ flowchart LR
 | Schema / checkpoint locations | `bronze.pipeline_meta/_schemas/<source>`, `bronze.pipeline_meta/_checkpoints/<source>` |
 | Lineage columns | `_input_file_name` (`_metadata.file_path`), `_ingestion_timestamp` (`current_timestamp()`), `_rescued_data` |
 | Schema drift | New column `source_schema_version` (batches 10-12) added automatically; `mergeSchema=true` on write |
-| Event tables | `primary_events_raw`, `secondary_events_raw`, `status_updates_raw` (notebook `day1/01_bronze_ingestion_autoloader`) |
+| Event tables | `primary_events_raw`, `secondary_events_raw`, `status_updates_raw` (notebook `notebooks/bronze/01_bronze_ingestion_autoloader`) |
 | Reference tables | `bronze_meter_id`, `bronze_substation_id` (Ingestion owner, Auto Loader from `azure_sql_extracts/`) |
 
 ## ERD (logical)

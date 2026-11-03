@@ -4,12 +4,14 @@
 
 ```
 capstone_09/
-  day1/   ingestion notebooks and tests (Bronze)
-  day2/   Silver, DQ, CDC
-  day3/   Gold, reconciliation
-  day4/   jobs, monitoring, performance
-  day5/   dashboard, MLflow, Genie, UAT
-  docs/   architecture, mappings, QA summaries, decision log, RAID
+  configs/              pipeline configuration (silver_config.json: DQ rules, interval, dedup)
+  docs/                 architecture, mappings, QA summaries, Git workflow, decision log, RAID
+  notebooks/bronze/     Bronze ingestion (01_bronze_ingestion_autoloader)
+  notebooks/silver/     Silver, DQ, CDC (02_silver_quality_cdc)
+  notebooks/gold/       Gold, KPIs (Day 3)
+  src/silver/           reusable Silver transform code (silver_transforms.py)
+  tests/silver/         pytest unit tests for src/silver
+  Readme.md
 ```
 
 ## Branch naming

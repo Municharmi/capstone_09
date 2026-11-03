@@ -9,5 +9,5 @@
 | A02 | Assumption | `related_entity_id` in secondary events refers to `substation_id` | Join correctness | Verified: 0 orphans; confirm in BRS | Tech Lead | Open |
 | I01 | Issue | BRS document not available in the workspace | Traceability matrix incomplete | Obtain BRS and link it in `01_architecture_hld_lld_erd.md` | Tech Lead | Open |
 | I02 | Issue | Reference tables have no table comment marking them as TEST SIMULATION | Labelling requirement (Day 1 step 7) | Owner to add table comments | Ingestion | Open |
-| I03 | Issue | `status_updates` has one revision per reading | TC04 cannot be shown with source data alone | Simulate a later revision on Day 2 | Quality | Open |
+| I03 | Issue | `status_updates` has one revision per reading | TC04 cannot be shown with source data alone | Covered on Day 2 by unit tests in `tests/silver/test_silver_transforms.py` (later revision, late update, out-of-order input); real data shows 0 late / out-of-order rows | Quality | Closed |
 | D01 | Dependency | Silver (Day 2) depends on Bronze tables and lineage column names | Rework if renamed | Freeze Bronze contract (see mapping doc) | Quality | Open |

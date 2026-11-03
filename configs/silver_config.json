@@ -1,0 +1,36 @@
+{
+  "interval": {"interval_minutes": 600, "tolerance_minutes": 5},
+  "dedup": {
+    "meter_readings":   {"key": ["reading_id"], "tie_breaker": "ingest_ts DESC, _input_file_name DESC, _ingestion_timestamp DESC, row hash ASC"},
+    "secondary_events": {"key": ["event_id"], "tie_breaker": "_input_file_name DESC, _ingestion_timestamp DESC, row hash ASC"},
+    "status_updates":   {"key": ["reading_id", "source_sequence"], "tie_breaker": "_input_file_name DESC, _ingestion_timestamp DESC, row hash ASC"}
+  },
+  "dq_rules": [
+    {"rule_id": "SM-DQ-001", "entity": "meter_readings", "column": "reading_id", "description": "reading_id is mandatory", "check": "reading_id IS NOT NULL AND trim(reading_id) <> ''", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-002", "entity": "meter_readings", "column": "meter_id", "description": "meter_id is mandatory and exists in bronze_meter_id", "check": "_meter_known", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-003", "entity": "meter_readings", "column": "substation_id", "description": "substation_id is mandatory and exists in bronze_substation_id", "check": "_substation_known", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-004", "entity": "meter_readings", "column": "event_timestamp", "description": "event_timestamp is mandatory and a valid timestamp", "check": "event_ts IS NOT NULL", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-005", "entity": "meter_readings", "column": "consumption_kwh", "description": "consumption_kwh is mandatory and numeric", "check": "kwh IS NOT NULL", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-006", "entity": "meter_readings", "column": "consumption_kwh", "description": "consumption_kwh within plausible range 0-12 kWh per interval (extreme values rejected)", "check": "kwh BETWEEN 0 AND 12", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-007", "entity": "meter_readings", "column": "unit", "description": "unit must be KWH", "check": "upper(trim(unit)) = 'KWH'", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-008", "entity": "meter_readings", "column": "voltage_v", "description": "voltage_v numeric and within 180-260 V", "check": "voltage BETWEEN 180 AND 260", "severity": "WARNING", "action": "FLAG"},
+    {"rule_id": "SM-DQ-009", "entity": "meter_readings", "column": "tariff_type", "description": "tariff_type is optional; missing values defaulted to UNKNOWN (raw value kept)", "check": "tariff_type IS NOT NULL", "severity": "WARNING", "action": "FLAG"},
+    {"rule_id": "SM-DQ-010", "entity": "meter_readings", "column": "meter_status", "description": "meter_status in OPEN, PENDING, COMPLETED, FAILED", "check": "upper(trim(meter_status)) IN ('OPEN','PENDING','COMPLETED','FAILED')", "severity": "WARNING", "action": "FLAG"},
+    {"rule_id": "SM-DQ-011", "entity": "meter_readings", "column": "ingest_timestamp", "description": "ingest_timestamp valid and not before event_timestamp", "check": "ingest_ts IS NOT NULL AND ingest_ts >= event_ts", "severity": "WARNING", "action": "FLAG"},
+    {"rule_id": "SM-DQ-012", "entity": "meter_readings", "column": "reading_id", "description": "duplicate reading_id: keep one copy by documented tie-breaker, audit the rest", "check": null, "severity": "INFO", "action": "DEDUPLICATE"},
+    {"rule_id": "SM-DQ-020", "entity": "secondary_events", "column": "event_id", "description": "event_id is mandatory", "check": "event_id IS NOT NULL AND trim(event_id) <> ''", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-021", "entity": "secondary_events", "column": "reading_id", "description": "reading_id exists in silver.meter_readings", "check": "_reading_known", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-022", "entity": "secondary_events", "column": "event_timestamp", "description": "event_timestamp is mandatory and a valid timestamp", "check": "event_ts IS NOT NULL", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-023", "entity": "secondary_events", "column": "event_value", "description": "event_value is mandatory and numeric", "check": "value IS NOT NULL", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-024", "entity": "secondary_events", "column": "event_type", "description": "event_type in CHECK, REVIEW, ALERT", "check": "upper(trim(event_type)) IN ('CHECK','REVIEW','ALERT')", "severity": "WARNING", "action": "FLAG"},
+    {"rule_id": "SM-DQ-025", "entity": "secondary_events", "column": "related_entity_id", "description": "related_entity_id exists in bronze_substation_id", "check": "_entity_known", "severity": "WARNING", "action": "FLAG"},
+    {"rule_id": "SM-DQ-026", "entity": "secondary_events", "column": "event_id", "description": "duplicate event_id: keep one copy by documented tie-breaker, audit the rest", "check": null, "severity": "INFO", "action": "DEDUPLICATE"},
+    {"rule_id": "SM-DQ-030", "entity": "status_updates", "column": "reading_id", "description": "reading_id exists in silver.meter_readings", "check": "_reading_known", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-031", "entity": "status_updates", "column": "source_sequence", "description": "source_sequence is mandatory and an integer", "check": "seq IS NOT NULL", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-032", "entity": "status_updates", "column": "change_timestamp", "description": "change_timestamp is mandatory and a valid timestamp", "check": "change_ts IS NOT NULL", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-033", "entity": "status_updates", "column": "new_status", "description": "new_status in OPEN, PENDING, COMPLETED, FAILED, CANCELLED, REVERSED", "check": "upper(trim(new_status)) IN ('OPEN','PENDING','COMPLETED','FAILED','CANCELLED','REVERSED')", "severity": "CRITICAL", "action": "QUARANTINE"},
+    {"rule_id": "SM-DQ-034", "entity": "status_updates", "column": "previous_status", "description": "previous_status equals the status of the prior version (status_chain_ok flag in history)", "check": null, "severity": "WARNING", "action": "FLAG"},
+    {"rule_id": "SM-DQ-035", "entity": "status_updates", "column": "source_sequence", "description": "late or out-of-order update (lower source_sequence than an update already received) goes to history only, never overwrites the current status", "check": null, "severity": "INFO", "action": "HISTORY_ONLY"},
+    {"rule_id": "SM-DQ-036", "entity": "status_updates", "column": "reading_id, source_sequence", "description": "duplicate (reading_id, source_sequence): keep one copy by documented tie-breaker, audit the rest", "check": null, "severity": "INFO", "action": "DEDUPLICATE"}
+  ]
+}

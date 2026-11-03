@@ -1,6 +1,6 @@
 # Source QA Summary (Day 1)
 
-Evidence: notebook `day1/01_bronze_ingestion_autoloader` (profile and test cells). Bronze was also compared row for row with the raw CSV files (EXCEPT ALL in both directions, incl. file path): 0 differences for all three event sources.
+Evidence: notebook `notebooks/bronze/01_bronze_ingestion_autoloader` (profile and test cells). Bronze was also compared row for row with the raw CSV files (EXCEPT ALL in both directions, incl. file path): 0 differences for all three event sources.
 
 ## Primary events (`primary_events_raw`)
 
