@@ -61,3 +61,5 @@ erDiagram
 ```
 
 `reading_id` is not unique in Bronze (40 exact duplicates); it becomes the business key of the Silver reading after deduplication.
+
+
